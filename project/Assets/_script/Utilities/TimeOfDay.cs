@@ -1,88 +1,87 @@
 using UnityEngine;
+using System.Collections;
 
+[ExecuteInEditMode]
 public class TimeOfDayController : MonoBehaviour
 {
-    public Light directionalLight; // Объект Directional Light
-    public Color dayColor = Color.white; // Цвет света днем
-    public Color nightColor = Color.blue; // Цвет света ночью
+    [SerializeField] Gradient directionalLightGradient;
+    [SerializeField] Gradient ambientLightGradient;
 
-    public float dayIntensity = 1.0f; // Интенсивность света днем
-    public float nightIntensity = 0.2f; // Интенсивность света ночью
-    public float transitionDuration = 5.0f; // Продолжительность перехода
+    [SerializeField, Range(1, 3600)] float timeDayInSeconds = 60;
+    [SerializeField, Range(0f, 1f)] float timeProgress;
 
-    private float transitionTime = 0.0f; // Время, прошедшее с начала перехода
-    private bool transitioning = false; // Флаг перехода
-    private Color startColor; // Начальный цвет
-    private Color endColor; // Конечный цвет
-    private float startIntensity; // Начальная интенсивность
-    private float endIntensity; // Конечная интенсивность
+    [SerializeField] Light dirLight;
 
-    private void Update()
+    [SerializeField] bool isTimeRunning = true;
+
+    Vector3 defaultAngles;
+
+    void Start() => defaultAngles = dirLight.transform.localEulerAngles;
+
+    void Update()
     {
-        if (transitioning)
+        if (Application.isPlaying)
         {
-            transitionTime += Time.deltaTime;
-
-            float t = Mathf.Clamp01(transitionTime / transitionDuration);
-
-            if (directionalLight != null)
+            if (isTimeRunning)
             {
-                directionalLight.color = Color.Lerp(startColor, endColor, t);
-                directionalLight.intensity = Mathf.Lerp(startIntensity, endIntensity, t);
-            }
+                timeProgress += Time.deltaTime / timeDayInSeconds;
 
-            if (t >= 1.0f)
-            {
-                transitioning = false;
+                if (timeProgress > 1f)
+                    timeProgress = 0f;
             }
         }
+
+        dirLight.color = directionalLightGradient.Evaluate(timeProgress);
+        RenderSettings.ambientLight = ambientLightGradient.Evaluate(timeProgress);
+
+        dirLight.transform.localEulerAngles = new Vector3(360f * timeProgress - 90, defaultAngles.x, defaultAngles.z);
     }
 
-    public void SetDay()
+    public void StopTime()
     {
-        if (directionalLight == null)
-        {
-            Debug.LogWarning("Directional Light not assigned!");
-            return;
-        }
-
-        if (!transitioning)
-        {
-            StartTransition(dayColor, dayIntensity);
-        }
-        else
-        {
-            Debug.LogWarning("Already transitioning!");
-        }
+        isTimeRunning = false;
     }
 
-    public void SetNight()
+    public void StartTime()
     {
-        if (directionalLight == null)
-        {
-            Debug.LogWarning("Directional Light not assigned!");
-            return;
-        }
-
-        if (!transitioning)
-        {
-            StartTransition(nightColor, nightIntensity);
-        }
-        else
-        {
-            Debug.LogWarning("Already transitioning!");
-        }
+        isTimeRunning = true;
     }
 
-    private void StartTransition(Color targetColor, float targetIntensity)
+    public void SetTime(float newTimeProgress)
     {
-        startColor = directionalLight.color;
-        endColor = targetColor;
+        timeProgress = Mathf.Clamp01(newTimeProgress);
+        ApplyTimeChanges();
+    }
 
-        startIntensity = directionalLight.intensity;
-        endIntensity = targetIntensity;
+    public void RewindTime(float targetTimeProgress)
+    {
+        StartCoroutine(RewindTimeCoroutine(targetTimeProgress));
+    }
 
-        transitionTime = 0.0f;
-        transitioning = true;
+    IEnumerator RewindTimeCoroutine(float targetTimeProgress)
+    {
+        float initialTimeProgress = timeProgress;
+
+        float elapsedTime = 0f;
+        float duration = Mathf.Abs(targetTimeProgress - initialTimeProgress);
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            timeProgress = Mathf.Lerp(initialTimeProgress, targetTimeProgress, elapsedTime / duration);
+            ApplyTimeChanges();
+            yield return null;
+        }
+
+        timeProgress = targetTimeProgress;
+        ApplyTimeChanges();
+    }
+
+    void ApplyTimeChanges()
+    {
+        dirLight.color = directionalLightGradient.Evaluate(timeProgress);
+        RenderSettings.ambientLight = ambientLightGradient.Evaluate(timeProgress);
+
+        dirLight.transform.localEulerAngles = new Vector3(360f * timeProgress - 90, defaultAngles.x, defaultAngles.z);
     }
 }
