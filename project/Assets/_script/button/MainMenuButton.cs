@@ -4,17 +4,16 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    public Button startButton;
     public Button exitButton;
 
     void Start()
     {
-        startButton.onClick.AddListener(StartGame);
         exitButton.onClick.AddListener(ExitGame);
     }
-    void StartGame()
+
+        public void LoadScene(string sceneName)
     {
-        SceneManager.LoadScene("MyGame");
+        SceneManager.LoadScene(sceneName);
     }
 
     void ExitGame()
