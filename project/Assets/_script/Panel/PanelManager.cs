@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PanelManager : MonoBehaviour
 {
@@ -27,5 +28,18 @@ public class PanelManager : MonoBehaviour
     {
       panel.SetActive(false);
     }
+  }
+
+  public void ExitGame()
+  {
+    Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+  }
+
+  public void LoadScene(string sceneName)
+  {
+    SceneManager.LoadScene(sceneName);
   }
 }

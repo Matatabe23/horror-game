@@ -5,43 +5,41 @@ using Utilities;
 
 public class GameMenu : MonoBehaviour
 {
-    private bool isPaused = false;
-    public GameObject menuUI;
-    public Player playerScript;
-    public PanelManager panelManager;
+  private bool isPaused = false;
+  public Player playerScript;
+  public PanelManager panelManager;
 
-    void Update()
+  void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.Escape))
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isPaused)
-            {
-                Resume();
-            }
-            else
-            {
-                Pause();
-            }
-        }
+      if (isPaused)
+      {
+        Resume();
+      }
+      else
+      {
+        Pause();
+      }
     }
+  }
 
-    public void Resume()
-    {
-        menuUI.SetActive(false);
-        Time.timeScale = 1f;
-        CursorManager.HideCursor();
-        playerScript.blockManagement = false;
-        isPaused = false;
+  public void Resume()
+  {
+    Time.timeScale = 1f;
+    CursorManager.HideCursor();
+    playerScript.blockManagement = false;
+    isPaused = false;
 
-        panelManager.HideAllPanels();
-    }
+    panelManager.HideAllPanels();
+  }
 
-    public void Pause()
-    {
-        menuUI.SetActive(true);
-        Time.timeScale = 0f;
-        CursorManager.ShowCursor();
-        playerScript.blockManagement = true;
-        isPaused = true;
-    }
+  public void Pause()
+  {
+    panelManager.ShowPanel(0);
+    Time.timeScale = 0f;
+    CursorManager.ShowCursor();
+    playerScript.blockManagement = true;
+    isPaused = true;
+  }
 }
