@@ -20,4 +20,12 @@ public class PanelManager : MonoBehaviour
       }
     }
   }
+
+  public void HideAllPanels()
+  {
+    foreach (GameObject panel in panels)
+    {
+      panel.SetActive(false);
+    }
+  }
 }

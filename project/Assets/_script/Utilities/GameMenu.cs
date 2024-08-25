@@ -8,6 +8,7 @@ public class GameMenu : MonoBehaviour
     private bool isPaused = false;
     public GameObject menuUI;
     public Player playerScript;
+    public PanelManager panelManager;
 
     void Update()
     {
@@ -31,12 +32,14 @@ public class GameMenu : MonoBehaviour
         CursorManager.HideCursor();
         playerScript.blockManagement = false;
         isPaused = false;
+
+        panelManager.HideAllPanels();
     }
 
     public void Pause()
     {
         menuUI.SetActive(true);
-        Time.timeScale = 0f; 
+        Time.timeScale = 0f;
         CursorManager.ShowCursor();
         playerScript.blockManagement = true;
         isPaused = true;
